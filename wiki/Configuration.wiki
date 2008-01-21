@@ -1,0 +1,12 @@
+#summary How to configure and use the application
+#labels Phase-Deploy
+
+= Configuration and Useage =
+
+== SkypeOut Functionality ==
+ * To make a SkypeOut call, phone pcuser from your SkypePhone. This will ring the number you set up in the forwarding section 
+ * To change the SkypeOut number from your mobile, send a chat message to pcuser from your phone containing the FULL phone number you want to ring (e.g. +44020123456). The application should change the setting and message you back when ready 
+ * If you have configured quick change numbers, just send 1, 2 or 3 as a chat message to the PC user to switch to this number
+
+== SkypeIn Functionality ==
+ * To receive a SkypeIn call, someone will ring your SkypeIn number and the application will answer the call, play a voice message down the phone asking the user to wait, put them on hold and then ring your mobile. When you answer, the calls will be merged and taken off hold, and you can speak to the caller. 
