@@ -1,0 +1,20 @@
+#summary Installation Instructions
+#labels Phase-Deploy
+
+= Important! =
+*You will need version 2.0 of the .NET framework installed to run this application.*
+
+= Installation =
+
+In order to set up the application, you will need a PC running constantly (or for the duration of your usage) with Skype installed on it.
+
+ # Create two Skype accounts, one for your PC and one for your phone (we will refer to these accounts as pcuser and mobileuser respectively)
+ # Log into Skype on the PC as pcuser, and add the mobile account to the contact list
+ # Buy a SkypeIn number and some SkypeOut credit for pcuser 
+ # Set up forwarding for pcuser to a landline number you think you might call a lot (like your home phone), using Tools / Call Forwarding 
+ # Log into your Skypephone as mobileuser and make sure you can make Skype calls back and forth between the PC and the phone 
+ # Unzip the file you downloaded from this site to somewhere on your PC, like C:\SkypePhoneManager 
+ # In the folder you unzipped to, edit the SkypePhoneManager.exe.config file and enter your mobile phone username in the appropriate space (e.g. mobileuser) 
+ # Run SkypePhoneManager.exe, and select the option to always allow the application to use Skype. Leave the application running. 
+
+Configuration
