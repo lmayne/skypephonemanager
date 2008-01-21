@@ -16,5 +16,3 @@ In order to set up the application, you will need a PC running constantly (or fo
  # Unzip the file you downloaded from this site to somewhere on your PC, like C:\SkypePhoneManager 
  # In the folder you unzipped to, edit the SkypePhoneManager.exe.config file and enter your mobile phone username in the appropriate space (e.g. mobileuser) 
  # Run SkypePhoneManager.exe, and select the option to always allow the application to use Skype. Leave the application running. 
-
-Configuration
