@@ -43,6 +43,8 @@ namespace SkypePhoneManager
         private string _strShortCutNum1;
         private string _strShortCutNum2;
         private string _strShortCutNum3;
+        private string _strShortCutNum4;
+        private string _strShortCutNum5;
 
         private int _intIncomingCallId;
         private int _intOutgoingCallId;
@@ -54,7 +56,7 @@ namespace SkypePhoneManager
         private void Form1_Load(object sender, EventArgs e)
         {
             // Start up our application
-            WriteToLog("Starting SkypePhone Manager v1.3");
+            WriteToLog("Starting SkypePhone Manager v1.4");
             WriteToLog(@"http://leon.mvps.org/SkypePhone/");
             WriteToLog();
             // Get the mobile user account
@@ -72,6 +74,8 @@ namespace SkypePhoneManager
             this._strShortCutNum1 = ConfigurationManager.AppSettings["ShortCut1"];
             this._strShortCutNum2 = ConfigurationManager.AppSettings["ShortCut2"];
             this._strShortCutNum3 = ConfigurationManager.AppSettings["ShortCut3"];
+            this._strShortCutNum4 = ConfigurationManager.AppSettings["ShortCut4"];
+            this._strShortCutNum5 = ConfigurationManager.AppSettings["ShortCut5"];
             
             // Attach to Skype
             WriteToLog("Attaching to Skype");
@@ -347,13 +351,32 @@ namespace SkypePhoneManager
                                 strNewNum = _strShortCutNum1;
                                 break;
                             case "2":
-                                // Speed switch 1
+                                // Speed switch 2
                                 strNewNum = _strShortCutNum2;
                                 break;
                             case "3":
-                                // Speed switch 1
+                                // Speed switch 3
                                 strNewNum = _strShortCutNum3;
                                 break;
+                            case "4":
+                                // Speed switch 4
+                                strNewNum = _strShortCutNum4;
+                                break;
+                            case "5":
+                                // Speed switch 5
+                                strNewNum = _strShortCutNum5;
+                                break;
+                            case "contacts":
+                                // List all the contact numbers
+                                string strContacts = "Quick switch numbers:" + Environment.NewLine +
+                                    "1: " + _strShortCutNum1 + Environment.NewLine +
+                                    "2: " + _strShortCutNum2 + Environment.NewLine +
+                                    "3: " + _strShortCutNum3 + Environment.NewLine +
+                                    "4: " + _strShortCutNum4 + Environment.NewLine +
+                                    "5: " + _strShortCutNum5;
+                                WriteToLog("Sending user the list of quick switch numbers");
+                                pMessage.Chat.SendMessage(strContacts);
+                                return; // Exit out of the function completely
                             default:
                                 strNewNum = pMessage.Body;
                                 break;
