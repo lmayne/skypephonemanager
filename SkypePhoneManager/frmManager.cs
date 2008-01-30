@@ -88,6 +88,9 @@ namespace SkypePhoneManager
             cSkype._ISkypeEvents_Event_ConnectionStatus += new _ISkypeEvents_ConnectionStatusEventHandler(OurConnectionStatus);
             this._objSkype.MessageStatus += new _ISkypeEvents_MessageStatusEventHandler(Skype_MessageStatus);
             this._objSkype.CallStatus += new _ISkypeEvents_CallStatusEventHandler(Skype_CallStatus);
+            // Form event handlers
+            this.SizeChanged += new System.EventHandler(this.frmManager_SizeChanged);
+            this.nfiMinimize.MouseDoubleClick += new MouseEventHandler(this.nfiMinimize_MouseDoubleClick);
 
             try
             {
@@ -424,6 +427,37 @@ namespace SkypePhoneManager
         {
             this.txtLog.Text += Environment.NewLine;
             this.txtLog.ScrollToCaret();
+        }
+
+        #endregion
+
+        #region Events
+
+        private void frmManager_SizeChanged(object sender, EventArgs e)
+        {
+            // Have they minimized the form?
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                // Yes, minimize to the system tray
+                this.ShowInTaskbar = false;
+                this.nfiMinimize.Visible = true;
+            }
+            else
+            {
+                // No, hide the icon and show the app
+                this.ShowInTaskbar = true;
+                this.nfiMinimize.Visible = false;
+                this.Focus();
+            }
+        }
+
+        private void nfiMinimize_MouseDoubleClick(object sender, EventArgs e)
+        {
+            // Re-show the application
+            this.ShowInTaskbar = true;
+            this.nfiMinimize.Visible = false;
+            this.WindowState = FormWindowState.Normal;
+            this.Focus();
         }
 
         #endregion
