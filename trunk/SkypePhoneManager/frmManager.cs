@@ -49,6 +49,8 @@ namespace SkypePhoneManager
         private int _intIncomingCallId;
         private int _intOutgoingCallId;
 
+        private SortedList<string, string> _colSkypeInMappings;
+
         #endregion
 
         #region Startup
@@ -57,7 +59,7 @@ namespace SkypePhoneManager
         {
             // Start up our application
             WriteToLog("Starting SkypePhone Manager v1.4");
-            WriteToLog(@"http://leon.mvps.org/SkypePhone/");
+            WriteToLog(@"http://code.google.com/p/skypephonemanager/");
             WriteToLog();
             // Get the mobile user account
             WriteToLog("Getting mobile user account details from config");
@@ -76,6 +78,20 @@ namespace SkypePhoneManager
             this._strShortCutNum3 = ConfigurationManager.AppSettings["ShortCut3"];
             this._strShortCutNum4 = ConfigurationManager.AppSettings["ShortCut4"];
             this._strShortCutNum5 = ConfigurationManager.AppSettings["ShortCut5"];
+
+            // Get any SkypeIn mapping settings
+            WriteToLog("Checking for additional SkypeIn mappings");
+            this._colSkypeInMappings = new SortedList<string,string>();
+            for (int i = 1; i <= 3; i++)
+            {
+                string[] strMapping = ConfigurationManager.AppSettings["SkypeInMapping" + i.ToString()].Split(@">".ToCharArray());
+                if (strMapping.Length > 1)
+                {
+                    WriteToLog("Mapping SkypeIn number " + strMapping[0] + " to " + strMapping[1]);
+                    this._colSkypeInMappings.Add(strMapping[0], strMapping[1]);
+                }
+            }
+            WriteToLog();
             
             // Attach to Skype
             WriteToLog("Attaching to Skype");
@@ -216,26 +232,41 @@ namespace SkypePhoneManager
                         aCall.set_InputDevice(TCallIoDeviceType.callIoDeviceTypeFile, "");
                         WriteToLog("Placing call on hold");
                         aCall.Hold();
+
+                        // Check to see if we need to foward this to
+                        // a configured SkypeIn mapping
+                        string strTargetNumber;
+                        if (this._colSkypeInMappings.ContainsKey(aCall.TargetIdentity))
+                        {
+                            // Yes set the target to the configured value
+                            strTargetNumber = this._colSkypeInMappings[aCall.TargetIdentity];
+                            WriteToLog("Calling SkypeIn forwarding number " + strTargetNumber);
+                        }
+                        else
+                        {
+                            // No, use the mobile user
+                            strTargetNumber = this._strMobileUser;
+                            WriteToLog("Calling mobile user");
+                        }
                         
-                        WriteToLog("Calling mobile user");
                         System.Threading.Thread.Sleep(500);
                         try
                         {
-                            SKYPE4COMLib.Call oCall = _objSkype.PlaceCall(this._strMobileUser, null, null, null);
+                            SKYPE4COMLib.Call oCall = _objSkype.PlaceCall(strTargetNumber, null, null, null);
                             this._intOutgoingCallId = oCall.Id;
                         }
                         catch (Exception ex)
                         {
-                            WriteToLog("Error trying to call mobile: " + ex.Message);
+                            WriteToLog("Error trying to call target: " + ex.Message);
                         }
                     }
                     break;
                 case TCallStatus.clsInProgress:
                     // We have a new call opened. Make sure it's our outgoing call
-                    if (aCall.Type == TCallType.cltOutgoingP2P)
+                    if (aCall.Id == this._intOutgoingCallId)
                     {
                         // Yes, the target user has answered.
-                        WriteToLog("Mobile user has answered, attempting to join calls");
+                        WriteToLog("Target user has answered, attempting to join calls");
                         foreach (SKYPE4COMLib.Call objCall in _objSkype.ActiveCalls)
                         {
                             if (objCall.Id == this._intIncomingCallId)
