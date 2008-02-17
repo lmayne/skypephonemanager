@@ -40,11 +40,7 @@ namespace SkypePhoneManager
         private bool _blnWasAttached;
         private bool _blnPendingSilentModeStartup;
 
-        private string _strShortCutNum1;
-        private string _strShortCutNum2;
-        private string _strShortCutNum3;
-        private string _strShortCutNum4;
-        private string _strShortCutNum5;
+        private string[] _strShortCutNums;
 
         private int _intIncomingCallId;
         private int _intOutgoingCallId;
@@ -58,7 +54,7 @@ namespace SkypePhoneManager
         private void Form1_Load(object sender, EventArgs e)
         {
             // Start up our application
-            WriteToLog("Starting SkypePhone Manager v1.4");
+            WriteToLog("Starting SkypePhone Manager v2.0");
             WriteToLog(@"http://code.google.com/p/skypephonemanager/");
             WriteToLog();
             // Get the mobile user account
@@ -72,12 +68,15 @@ namespace SkypePhoneManager
             }
 
             // Get the fast dial numbers
-            WriteToLog("Loading in quick call numbers");
-            this._strShortCutNum1 = ConfigurationManager.AppSettings["ShortCut1"];
-            this._strShortCutNum2 = ConfigurationManager.AppSettings["ShortCut2"];
-            this._strShortCutNum3 = ConfigurationManager.AppSettings["ShortCut3"];
-            this._strShortCutNum4 = ConfigurationManager.AppSettings["ShortCut4"];
-            this._strShortCutNum5 = ConfigurationManager.AppSettings["ShortCut5"];
+            WriteToLog("Loading in quick switch numbers");
+            this._strShortCutNums = new string[6];
+            // Set the dummy zero number
+            this._strShortCutNums[0] = "";
+            // Get the numbers into the array
+            for (int i = 1; i < _strShortCutNums.Length; i++)
+            {
+                this._strShortCutNums[i] = ConfigurationManager.AppSettings["ShortCut" + i.ToString()];
+            }
 
             // Get any SkypeIn mapping settings
             WriteToLog("Checking for additional SkypeIn mappings");
@@ -368,71 +367,91 @@ namespace SkypePhoneManager
                 // Make sure the request came from the mobile account
                 if (pMessage.Sender.Handle.Equals(this._strMobileUser))
                 {
-                    // OK, they want to make a change request
+                    // OK, they want to make a change request or send an SMS
                     try
                     {
-                        WriteToLog("Forwarding change request received from " + this._strMobileUser);
-                        string strNewNum = "";
-                        switch (pMessage.Body.ToLower())
+                        if (pMessage.Body.Length > 3 && pMessage.Body.ToLower().Substring(0, 3).Equals("sms"))
                         {
-                            case "off":
-                                // Switch off forwarding
-                                _objSkype.CurrentUserProfile.CallApplyCF = false;
-                                _objSkype.CurrentUserProfile.CallForwardRules = "";
-                                break;
-                            case "1":
-                                // Speed switch 1
-                                strNewNum = _strShortCutNum1;
-                                break;
-                            case "2":
-                                // Speed switch 2
-                                strNewNum = _strShortCutNum2;
-                                break;
-                            case "3":
-                                // Speed switch 3
-                                strNewNum = _strShortCutNum3;
-                                break;
-                            case "4":
-                                // Speed switch 4
-                                strNewNum = _strShortCutNum4;
-                                break;
-                            case "5":
-                                // Speed switch 5
-                                strNewNum = _strShortCutNum5;
-                                break;
-                            case "contacts":
-                                // List all the contact numbers
-                                string strContacts = "Quick switch numbers:" + Environment.NewLine +
-                                    "1: " + _strShortCutNum1 + Environment.NewLine +
-                                    "2: " + _strShortCutNum2 + Environment.NewLine +
-                                    "3: " + _strShortCutNum3 + Environment.NewLine +
-                                    "4: " + _strShortCutNum4 + Environment.NewLine +
-                                    "5: " + _strShortCutNum5;
-                                WriteToLog("Sending user the list of quick switch numbers");
-                                pMessage.Chat.SendMessage(strContacts);
-                                return; // Exit out of the function completely
-                            default:
-                                strNewNum = pMessage.Body;
-                                break;
-                        }
+                            // This is an SMS request
+                            WriteToLog("SMS request received from " + this._strMobileUser);
 
-                        if (string.IsNullOrEmpty(strNewNum))
-                        {
-                            pMessage.Chat.SendMessage("Switched off call forwarding");
-                            WriteToLog("Switched off call forwarding");
+                            // Get the number to SMS to
+                            string[] strBits = pMessage.Body.Split(" ".ToCharArray());
+                            // The number to call is the second argument
+                            // (string is in the format "sms [number] [message]"
+                            string strSmsTarget = strBits[1];
+                            // See if it is a quickswitch number
+                            int intQuickSwitch;
+                            if (int.TryParse(strSmsTarget, out intQuickSwitch) && (intQuickSwitch > 0 && intQuickSwitch < _strShortCutNums.Length))
+                            {
+                                // Yes, this is a quickswitch number. Get the number for it
+                                strSmsTarget = this._strShortCutNums[intQuickSwitch];
+                            }
+                            WriteToLog("Sending SMS to " + strSmsTarget);
+
+                            // Get the message
+                            string strMessage = pMessage.Body.Substring(pMessage.Body.IndexOf(" ", 4) + 1);
+                            WriteToLog("Message is: " + strMessage);
+
+                            // Send the SMS
+                            _objSkype.SendSms(strSmsTarget, strMessage, null);
+                            WriteToLog("SMS sent");
+                            pMessage.Chat.SendMessage("SMS sent to " + strSmsTarget);
+                            WriteToLog();
                         }
                         else
                         {
-                            _objSkype.CurrentUserProfile.CallApplyCF = true;
-                            _objSkype.CurrentUserProfile.CallForwardRules = "0,60," + strNewNum;
-                            _objSkype.CurrentUserProfile.CallNoAnswerTimeout = 5;
-                            pMessage.Chat.SendMessage("Reset call forwarding to " + strNewNum);
-                            WriteToLog("Changed SkypeOut forwarding to " + strNewNum);
+                            // This is a SkypeOut change request
+                            WriteToLog("Forwarding change request received from " + this._strMobileUser);
+                            string strNewNum = "";
+                            switch (pMessage.Body.ToLower())
+                            {
+                                case "off":
+                                    // Switch off forwarding
+                                    _objSkype.CurrentUserProfile.CallApplyCF = false;
+                                    _objSkype.CurrentUserProfile.CallForwardRules = "";
+                                    break;
+                                case "1":
+                                case "2":
+                                case "3":
+                                case "4":
+                                case "5":
+                                    // Quick switch number
+                                    strNewNum = this._strShortCutNums[int.Parse(pMessage.Body)];
+                                    break;
+                                case "contacts":
+                                    // List all the contact numbers
+                                    string strContacts = "Quick switch numbers:" + Environment.NewLine;
+                                    for (int i = 1; i <= 5; i++)
+                                    {
+                                        strContacts += i.ToString() + ": " + this._strShortCutNums[i] + Environment.NewLine;
+                                    }
+                                    WriteToLog("Sending user the list of quick switch numbers");
+                                    pMessage.Chat.SendMessage(strContacts);
+                                    return; // Exit out of the function completely
+                                default:
+                                    strNewNum = pMessage.Body;
+                                    break;
+                            }
+
+                            if (string.IsNullOrEmpty(strNewNum))
+                            {
+                                pMessage.Chat.SendMessage("Switched off call forwarding");
+                                WriteToLog("Switched off call forwarding");
+                            }
+                            else
+                            {
+                                _objSkype.CurrentUserProfile.CallApplyCF = true;
+                                _objSkype.CurrentUserProfile.CallForwardRules = "0,60," + strNewNum;
+                                _objSkype.CurrentUserProfile.CallNoAnswerTimeout = 5;
+                                pMessage.Chat.SendMessage("Reset call forwarding to " + strNewNum);
+                                WriteToLog("Changed SkypeOut forwarding to " + strNewNum);
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-                        pMessage.Chat.SendMessage("Error resetting call forwarding to " + pMessage.Body + ": " + ex.Message);
+                        pMessage.Chat.SendMessage("Error:  " + ex.Message);
                     }
                 }
                 else
