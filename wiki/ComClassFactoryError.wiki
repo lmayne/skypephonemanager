@@ -9,7 +9,7 @@ Some users (the pattern appears to be people using non-english versions of Windo
 *_Retrieving the COM class factory for component with CLSID {830690FC-BF2F-47A6-AC2D-330BCB402664} failed_*
 
 == CAUSE ==
-This problem is caused by the deployed Skype interop DLL not being compatable with your version of Windows
+This problem is caused by the deployed Skype interop DLL not being compatible with your version of Windows
 
 == RESOLUTION ==
 To fix this issue:
