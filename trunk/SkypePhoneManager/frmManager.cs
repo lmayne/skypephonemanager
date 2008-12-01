@@ -1,6 +1,7 @@
 #region Imports
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -40,7 +41,7 @@ namespace SkypePhoneManager
         private bool _blnWasAttached;
         private bool _blnPendingSilentModeStartup;
 
-        private string[] _strShortCutNums;
+        private ArrayList _strShortCutNums;
 
         private int _intIncomingCallId;
         private int _intOutgoingCallId;
@@ -69,15 +70,21 @@ namespace SkypePhoneManager
 
             // Get the fast dial numbers
             WriteToLog("Loading in quick switch numbers");
-            this._strShortCutNums = new string[6];
+            this._strShortCutNums = new ArrayList();
             // Set the dummy zero number
-            this._strShortCutNums[0] = "";
+            this._strShortCutNums.Add("");
             // Get the numbers into the array
-            for (int i = 1; i < _strShortCutNums.Length; i++)
+            for (int i = 1; i <= 100; i++)
             {
-                this._strShortCutNums[i] = ConfigurationManager.AppSettings["ShortCut" + i.ToString()];
+                if (ConfigurationManager.AppSettings["ShortCut" + i.ToString()] != null)
+                {
+                    this._strShortCutNums.Add(ConfigurationManager.AppSettings["ShortCut" + i.ToString()]);
+                }
+                else
+                {
+                    break;
+                }
             }
-
             // Get any SkypeIn mapping settings
             WriteToLog("Checking for additional SkypeIn mappings");
             this._colSkypeInMappings = new SortedList<string,string>();
@@ -382,10 +389,10 @@ namespace SkypePhoneManager
                             string strSmsTarget = strBits[1];
                             // See if it is a quickswitch number
                             int intQuickSwitch;
-                            if (int.TryParse(strSmsTarget, out intQuickSwitch) && (intQuickSwitch > 0 && intQuickSwitch < _strShortCutNums.Length))
+                            if (int.TryParse(strSmsTarget, out intQuickSwitch) && (intQuickSwitch > 0 && intQuickSwitch < _strShortCutNums.Count))
                             {
                                 // Yes, this is a quickswitch number. Get the number for it
-                                strSmsTarget = this._strShortCutNums[intQuickSwitch];
+                                strSmsTarget = (string)this._strShortCutNums[intQuickSwitch];
                             }
                             WriteToLog("Sending SMS to " + strSmsTarget);
 
@@ -417,7 +424,7 @@ namespace SkypePhoneManager
                                 case "4":
                                 case "5":
                                     // Quick switch number
-                                    strNewNum = this._strShortCutNums[int.Parse(pMessage.Body)];
+                                    strNewNum = (string)this._strShortCutNums[int.Parse(pMessage.Body)];
                                     break;
                                 case "contacts":
                                     // List all the contact numbers
