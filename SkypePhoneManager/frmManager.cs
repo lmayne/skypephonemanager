@@ -429,7 +429,7 @@ namespace SkypePhoneManager
                                 case "contacts":
                                     // List all the contact numbers
                                     string strContacts = "Quick switch numbers:" + Environment.NewLine;
-                                    for (int i = 1; i <= 5; i++)
+                                    for (int i = 1; i < this._strShortCutNums.Count; i++)
                                     {
                                         strContacts += i.ToString() + ": " + this._strShortCutNums[i] + Environment.NewLine;
                                     }
