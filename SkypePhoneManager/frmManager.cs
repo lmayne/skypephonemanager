@@ -411,34 +411,36 @@ namespace SkypePhoneManager
                             // This is a SkypeOut change request
                             WriteToLog("Forwarding change request received from " + this._strMobileUser);
                             string strNewNum = "";
-                            switch (pMessage.Body.ToLower())
+                            // See if this is a quickswitch number
+                            double dOut;
+                            if (Double.TryParse(pMessage.Body.ToLower(), System.Globalization.NumberStyles.Integer, new System.Globalization.CultureInfo("en-GB"), out dOut) && int.Parse(pMessage.Body.ToLower()) > 0 && int.Parse(pMessage.Body.ToLower()) <= 100)
                             {
-                                case "off":
-                                    // Switch off forwarding
-                                    _objSkype.CurrentUserProfile.CallApplyCF = false;
-                                    _objSkype.CurrentUserProfile.CallForwardRules = "";
-                                    break;
-                                case "1":
-                                case "2":
-                                case "3":
-                                case "4":
-                                case "5":
-                                    // Quick switch number
-                                    strNewNum = (string)this._strShortCutNums[int.Parse(pMessage.Body)];
-                                    break;
-                                case "contacts":
-                                    // List all the contact numbers
-                                    string strContacts = "Quick switch numbers:" + Environment.NewLine;
-                                    for (int i = 1; i < this._strShortCutNums.Count; i++)
-                                    {
-                                        strContacts += i.ToString() + ": " + this._strShortCutNums[i] + Environment.NewLine;
-                                    }
-                                    WriteToLog("Sending user the list of quick switch numbers");
-                                    pMessage.Chat.SendMessage(strContacts);
-                                    return; // Exit out of the function completely
-                                default:
-                                    strNewNum = pMessage.Body;
-                                    break;
+                                // Quickswitch number
+                                strNewNum = (string)this._strShortCutNums[int.Parse(pMessage.Body)];
+                            }
+                            else
+                            {
+                                switch (pMessage.Body.ToLower())
+                                {
+                                    case "off":
+                                        // Switch off forwarding
+                                        _objSkype.CurrentUserProfile.CallApplyCF = false;
+                                        _objSkype.CurrentUserProfile.CallForwardRules = "";
+                                        break;
+                                    case "contacts":
+                                        // List all the contact numbers
+                                        string strContacts = "Quick switch numbers:" + Environment.NewLine;
+                                        for (int i = 1; i < this._strShortCutNums.Count; i++)
+                                        {
+                                            strContacts += i.ToString() + ": " + this._strShortCutNums[i] + Environment.NewLine;
+                                        }
+                                        WriteToLog("Sending user the list of quick switch numbers");
+                                        pMessage.Chat.SendMessage(strContacts);
+                                        return; // Exit out of the function completely
+                                    default:
+                                        strNewNum = pMessage.Body;
+                                        break;
+                                }
                             }
 
                             if (string.IsNullOrEmpty(strNewNum))
