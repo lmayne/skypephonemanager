@@ -3,10 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using SKYPE4COMLib;
 using System.Configuration;
@@ -68,7 +64,7 @@ namespace SkypePhoneManager
                 this.Close();
             }
 
-            // Get the fast dial numbers
+            // Get the quickswitch numbers
             WriteToLog("Loading in quick switch numbers");
             this._strShortCutNums = new ArrayList();
             // Set the dummy zero number
@@ -413,7 +409,8 @@ namespace SkypePhoneManager
                             string strNewNum = "";
                             // See if this is a quickswitch number
                             double dOut;
-                            if (Double.TryParse(pMessage.Body.ToLower(), System.Globalization.NumberStyles.Integer, new System.Globalization.CultureInfo("en-GB"), out dOut) && int.Parse(pMessage.Body.ToLower()) > 0 && int.Parse(pMessage.Body.ToLower()) <= 100)
+                            if (Double.TryParse(pMessage.Body.ToLower(), System.Globalization.NumberStyles.Integer, new System.Globalization.CultureInfo("en-GB"), out dOut)
+                                && int.Parse(pMessage.Body.ToLower()) > 0 && int.Parse(pMessage.Body.ToLower()) <= 100)
                             {
                                 // Quickswitch number
                                 strNewNum = (string)this._strShortCutNums[int.Parse(pMessage.Body)];
