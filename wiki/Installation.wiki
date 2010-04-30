@@ -16,3 +16,17 @@ In order to set up the application, you will need a PC running constantly (or fo
  # Unzip the file you downloaded from this site to somewhere on your PC, like C:\SkypePhoneManager 
  # In the folder you unzipped to, edit the SkypePhoneManager.exe.config file and enter your mobile phone username in the appropriate space (e.g. mobileuser) 
  # Run SkypePhoneManager.exe, and select the option to always allow the application to use Skype. Leave the application running. 
+
+= Common Problems =
+There seem to be two main problems that people run into when installing the application:
+ # Not extracting all the files. A lot of people assume the exe is an installer and try double-clicking it in Winzip or similar. You need to extract all the files in the zip to a folder before configuring and running the exe.
+ # Unable to open the config file. This is a plain text document which should be opened using notepad or wordpad, NOT Microsoft Word.
+ # Changing both the key and the value in the config file. A lot of people change both the setting name and the value instead of just the value. For example, if your username is fredbloggs then your config line should look like this:
+
+{{{
+<add key="SkypeMobileUsername" value="fredbloggs"/>
+}}}
+NOT:
+{{{
+<add key="fredbloggs" value="fredbloggs"/>
+}}}
