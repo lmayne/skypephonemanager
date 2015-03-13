@@ -1,0 +1,3 @@
+3 SkypePhone Manager is a Windows application which attaches to a running instance of Skype and forwards incoming calls (including SkypeIn calls) to another Skype account, which is usually an account on a SkypePhone (which does not, as yet, support SkypeIn natively).
+
+The application also manages outgoing call forwarding settings, allowing you to make calls and SMS messages from your mobile at SkypeOut rates. You can change (or disable) the number the account forwards to by sending a chat message to the PC Skype account.
